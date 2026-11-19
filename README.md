@@ -1,0 +1,2 @@
+# Sinema
+Birlikte Sinema uygulaması
