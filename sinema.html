@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e8456b">
+<title>Birlikte Sinema</title>
+<style>
+:root{--bg:#fff7f0;--card:#fff;--tx:#2a1f2d;--mu:#8a7a8c;--ac:#e8456b;--ac2:#ff8a5c;--bd:#f1dfe0;--ot:#f6ebec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{--bg:#0e0b16;--card:#1a1526;--tx:#f3ecf7;--mu:#9a8fae;--ac:#ff5c8a;--ac2:#9b6bff;--bd:#2c2540;--ot:#251e38}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px}
+h1{font-size:17px;margin:0;flex:1}
+.dot{width:9px;height:9px;border-radius:50%;background:#aaa;display:inline-block;margin-right:6px}.dot.on{background:#33d17a}
+button{font:inherit;border:0;border-radius:12px;padding:10px 14px;background:var(--ot);color:var(--tx);cursor:pointer;position:relative}
+button.p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-weight:600}
+button.r{background:#e5484d;color:#fff}.ic{padding:8px 11px;font-size:17px}
+#stage{position:relative;background:#000;margin:0 12px;border-radius:16px;overflow:hidden;aspect-ratio:16/9;flex:none;user-select:none;-webkit-user-select:none}
+#stage:fullscreen{aspect-ratio:auto;border-radius:0;margin:0;width:100%;height:100%}
+#mv{width:100%;height:100%;display:block;background:#000}
+#empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#ddd;text-align:center;padding:12px}
+#rv{position:absolute;right:8px;top:8px;width:30%;max-width:130px;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:2px solid var(--ac);background:#222;display:none}
+#lv{position:absolute;left:8px;top:8px;width:20%;max-width:90px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#222;display:none;transform:scaleX(-1)}
+#toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:6px 12px;border-radius:14px;font-size:13px;max-width:70%;display:none;text-align:center;pointer-events:none}
+#fx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.fl{position:absolute;bottom:60px;font-size:30px;animation:up 2.2s ease-out forwards}
+@keyframes up{to{transform:translateY(-170px);opacity:0}}
+#ov{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;opacity:0;transition:opacity .25s;pointer-events:none}
+#stage.show #ov{opacity:1;pointer-events:auto}
+.bar{display:flex;align-items:center;gap:8px;font-size:12px}.bar input{flex:1;accent-color:var(--ac)}
+.btns{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:2px;flex-wrap:wrap}
+.ob{background:rgba(255,255,255,.14);color:#fff;padding:6px 9px;font-size:14px;border-radius:10px}
+.ob.on{background:var(--ac)}
+#vol{width:60px;accent-color:var(--ac)}
+#rx{display:flex;justify-content:center;gap:6px;padding:6px 12px 2px}#rx button{padding:4px 10px;font-size:18px;background:none}
+nav{display:flex;gap:6px;padding:4px 12px 6px}nav button{flex:1;padding:9px 4px;font-size:13px}nav button.a{background:var(--ac);color:#fff}
+.bd{position:absolute;top:-4px;right:-2px;background:#e5484d;color:#fff;font-size:11px;border-radius:9px;padding:0 6px;display:none}
+main{flex:1;min-height:0;display:flex;flex-direction:column;margin:0 12px 12px;background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden}
+.pane{display:none;flex:1;min-height:0;flex-direction:column}.pane.a{display:flex}
+#msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:80%;padding:8px 12px;border-radius:16px;background:var(--ot);align-self:flex-start;word-break:break-word}
+.m.me{background:var(--ac);color:#fff;align-self:flex-end}.m.sys{align-self:center;background:none;color:var(--mu);font-size:12px;text-align:center}
+#sf{display:flex;gap:6px;padding:8px;border-top:1px solid var(--bd)}
+input[type=text],textarea{border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);font:inherit;padding:10px}
+#sf input{flex:1}
+.cn{padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+textarea{width:100%;height:70px;font:12px monospace}
+.s{font-size:13px;color:var(--mu)}.row{display:flex;gap:8px;flex-wrap:wrap}
+body.cine{background:#000}body.cine header,body.cine nav{opacity:.3}
+#stage{max-height:46vh}#stage:fullscreen{max-height:none}#mv{object-fit:contain}
+@media (orientation:landscape) and (max-height:600px){
+body{display:grid;grid-template-columns:1.35fr 1fr;grid-template-rows:auto auto 1fr auto;grid-template-areas:"h h" "s n" "s m" "x m"}
+header{grid-area:h}#stage{grid-area:s;max-height:none;aspect-ratio:auto;margin:0 0 0 12px;min-height:0}
+#rx{grid-area:x}nav{grid-area:n}main{grid-area:m;min-height:0;margin:0 12px 12px 8px}}
+#stage:not(.has) #ov{display:none}
+#sf input{min-width:0}#sf button{flex:none}main,.pane{min-width:0}
+@media (orientation:landscape) and (max-height:600px){
+header{padding:3px 14px}h1{font-size:15px}.ic{padding:4px 9px}
+nav{padding:2px 12px 4px 8px}nav button{padding:5px 2px;font-size:12px}
+#rx{padding:0 12px}#rx button{padding:0 8px;font-size:16px}}
+body.kb{grid-template-columns:1fr!important;grid-template-rows:auto 1fr!important;grid-template-areas:"n" "m"!important}
+body.kb header,body.kb #stage,body.kb #rx{display:none}body.kb main{margin:0 12px 6px}
+#cams{display:none;gap:8px;justify-content:center;padding:6px 12px 0}
+#cams #rv,#cams #lv{position:static;width:auto;height:92px;max-width:none;top:auto;left:auto;right:auto;aspect-ratio:3/4;object-fit:cover;border-radius:12px}
+#dlg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center}
+.dc{background:var(--card);color:var(--tx);border-radius:16px;padding:18px;max-width:320px;margin:12px;text-align:center}#dt{margin-bottom:14px}
+@media (orientation:landscape) and (max-height:600px){
+body{grid-template-rows:auto auto auto 1fr auto!important;grid-template-areas:"h h" "s c" "s n" "s m" "x m"!important}
+#cams{grid-area:c;padding:2px 12px 2px 8px;justify-content:flex-start}#cams #rv,#cams #lv{height:80px}}
+body.kb{grid-template-areas:"n" "m"!important;grid-template-rows:auto 1fr!important}body.kb #cams{display:none!important}
+#subt{position:absolute;left:6%;right:6%;bottom:58px;text-align:center;color:#fff;font:600 var(--ss,18px)/1.3 system-ui,sans-serif;text-shadow:0 0 4px #000,0 0 3px #000;pointer-events:none;white-space:pre-line}
+#stage:not(.show) #subt{bottom:14px}
+</style></head><body>
+<header><h1>🎬 Birlikte Sinema</h1><span class="s"><i class="dot" id="dot"></i><span id="st">Bağlı değil</span></span>
+<button class="ic" id="cine" title="Sinema modu">🍿</button><button class="ic" id="th">🌙</button></header>
+
+<div id="stage" class="show"><video id="mv" playsinline></video>
+<div id="yt" style="position:absolute;inset:0;display:none"></div>
+<div id="empty"><div style="font-size:34px">🎞️</div><div id="et">Oda kuran filmi seçer, katılan canlı izler</div><button class="p" id="pick">Film seç</button></div>
+<div id="fx"></div><div id="subt"></div><div id="toast"></div>
+<div id="ov">
+<div class="bar"><span id="tm">0:00</span><input type="range" id="sk" min="0" max="1000" value="0"><span id="du">0:00</span></div>
+<div class="btns">
+<button class="ob" id="b10" title="10 sn geri">⏪ 10</button><button class="ob" id="pp">▶</button><button class="ob" id="f10" title="10 sn ileri">10 ⏩</button>
+<button class="ob" id="mu">🔊</button><input type="range" id="vol" min="0" max="1" step="0.05" value="1">
+<button class="ob" id="spd">1x</button><button class="ob" id="cc">CC</button><button class="ob" id="pip">⧉</button><button class="ob" id="hrt">❤️</button><button class="ob" id="fs">⛶</button>
+</div></div></div>
+<div id="cams"><video id="lv" playsinline autoplay muted></video><video id="rv" playsinline autoplay></video></div>
+<div id="dlg"><div class="dc"><div id="dt"></div><div class="row" style="justify-content:center"><button id="dn">Vazgeç</button><button class="p" id="dy">Evet, aç</button></div></div></div>
+<input type="file" id="fp" accept="video/*,.mkv" hidden><input type="file" id="sfp" accept=".srt,.vtt" hidden>
+<div id="rx"><button>❤️</button><button>😂</button><button>😮</button><button>😢</button><button>👏</button><button>🔥</button></div>
+<nav><button class="a" data-t="chat">💬 Sohbet<i class="bd" id="bd"></i></button><button data-t="call">📞 Arama</button><button data-t="conn">🔗 Bağlan</button><button data-t="set">⚙️ Ayar</button></nav>
+<main>
+<section class="pane a" id="chat"><div id="msgs"><div class="m sys">Önce “Bağlan” sekmesinden eşleşin.</div></div>
+<form id="sf" onsubmit="return false"><input type="text" id="mi" placeholder="Mesaj yaz…" autocomplete="off"><button class="p" id="sb">Gönder</button></form></section>
+<section class="pane" id="call"><div class="cn">
+<div class="row"><button class="p" id="mic">🎤 Mikrofon: kapalı</button><button id="cam">📷 Kamera: kapalı</button><button id="flip">🔄 Kamera çevir</button></div>
+<div class="s">Mikrofon ve kamerayı bağlanmadan önce açarsan arama otomatik başlar. Kamera görüntüsü filmin üstünde küçük pencerede görünür.</div>
+<button class="r" id="hang">Bağlantıyı bitir</button></div></section>
+<section class="pane" id="conn"><div class="cn">
+<div class="s">Biri “Oda kur” der ve çıkan kodu söyler. Diğeri “Katıl” der, kodu yazar ve otomatik bağlanır.</div>
+<div class="row"><button class="p" id="host">Oda kur</button><button id="join">Katıl</button></div>
+<div id="codeBox" style="display:none;text-align:center;font:700 44px monospace;letter-spacing:8px;padding:8px"></div>
+<input type="text" id="inp" inputmode="numeric" maxlength="4" placeholder="4 haneli kodu yaz" style="display:none;width:100%;text-align:center;font-size:24px;letter-spacing:6px">
+</div></section>
+<section class="pane" id="set"><div class="cn">
+<input type="text" id="nm" placeholder="Adın" maxlength="20">
+<div class="row"><button id="sd1">◀ Altyazı erken 0.5s</button><button id="sd2">Altyazı geç 0.5s ▶</button><button id="sz1">A−</button><button id="sz2">A+</button></div>
+<div class="s" id="sinfo">Gecikme: 0.0 sn · Boyut: 18</div><div class="s" id="pi"></div>
+<input type="text" id="tn" placeholder="TURN (isteğe bağlı): turn:adres:443|kullanıcı|şifre">
+<div class="row" id="lkrow"><input type="text" id="lk" placeholder="YouTube veya video linki" style="flex:1;min-width:150px"><button class="p" id="lkb">▶ Linkle aç</button></div>
+<div class="row"><button id="sub">📝 Altyazı yükle</button><button id="chg">🎞️ Filmi değiştir</button><button class="p" id="syn">🔄 Karşıyla eşitle</button></div>
+<div class="s">Eşitle: karşı tarafın film konumuna atlar. Kısayollar: boşluk oynat/durdur, ←/→ 10 sn, F tam ekran, M ses. Ekrana çift dokunarak da 10 sn ileri/geri sarabilirsin (sol yarı geri, sağ yarı ileri). Altyazı .srt veya .vtt olabilir. Film kaldığın yerden devam eder.</div>
+</div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id),mv=$('mv'),stage=$('stage');
+let cues=[],sdel=0,ssz=18,subBuf=[],gt=0,gts=0,gp=false,code=null,gen=0,lastGen=0,rcT=null,wantRC=false,facing='user',host=null,gm=null,gr=1,gd=0,lm=false,yt=null,ytLast=0,pc,dc,ls=null,applying=false,micOn=false,camOn=false,unread=0,peer='Karşı taraf',fkey='',sdeb,hideT,toastT,lastSave=0,subOn=false,lastTap=0;
+const ST=k=>{try{return localStorage.getItem(k)}catch(e){return null}},SS=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const fmt=s=>{s=Math.max(0,s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),c=String(Math.floor(s%60)).padStart(2,'0');return h?h+':'+String(m).padStart(2,'0')+':'+c:m+':'+c};
+// tema
+const root=document.documentElement;let dark=matchMedia('(prefers-color-scheme:dark)').matches;
+const ap=()=>{root.dataset.theme=dark?'dark':'light';$('th').textContent=dark?'☀️':'🌙'};ap();
+$('th').onclick=()=>{dark=!dark;ap()};
+$('cine').onclick=()=>{document.body.classList.toggle('cine');if(document.body.classList.contains('cine')){dark=true;ap()}};
+// sekmeler
+const tab=t=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('a',x.dataset.t===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('a',p.id===t));if(t==='chat'){unread=0;$('bd').style.display='none'}};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+// yardımcılar
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>e.style.display='none',2600)}
+function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('msgs').appendChild(d);$('msgs').scrollTop=1e9}
+const sys=t=>add(t,'sys');
+const send=o=>{if(dc&&dc.readyState==='open')dc.send(JSON.stringify(o))};
+function react(e,mine){const d=document.createElement('div');d.className='fl';d.textContent=e;d.style.left=(10+Math.random()*80)+'%';$('fx').appendChild(d);setTimeout(()=>d.remove(),2300);if(mine)send({k:'r',e})}
+document.querySelectorAll('#rx button').forEach(b=>b.onclick=()=>react(b.textContent,1));$('hrt').onclick=()=>react('❤️',1);
+// kontrol çubuğu gizle/göster
+function show(){stage.classList.add('show');clearTimeout(hideT);if(!mv.paused)hideT=setTimeout(()=>stage.classList.remove('show'),3000)}
+stage.addEventListener('mousemove',show);
+// film seçimi
+$('pick').onclick=$('chg').onclick=()=>host===false?toast('Filmi oda kurucusu seçer'):$('fp').click();
+$('fp').onchange=e=>{const f=e.target.files[0];if(!f)return;lm=false;showMv();mv.src=URL.createObjectURL(f);hideEmpty();fkey='pos:'+f.name+f.size;sys('Film seçildi: '+f.name);tab('chat');mv._n=f.name};
+mv.onloadedmetadata=()=>{if(gm)return;$('du').textContent=fmt(mv.duration);send({k:'meta',n:mv._n,d:mv.duration});const p=parseFloat(ST(fkey));if(p>15&&p<mv.duration-20){applying=true;mv.currentTime=p;setTimeout(()=>applying=false,600);toast('Kaldığın yerden devam: '+fmt(p))}};
+// oynatma ve eşitleme
+const act=(a)=>{if(applying||gm)return;send({k:'v',a,t:mv.currentTime,r:mv.playbackRate,n:$('nm').value||undefined})};
+const play=()=>mv.paused?mv.play():mv.pause();
+async function wake(){try{if(navigator.wakeLock&&!mv.paused)window._wl=await navigator.wakeLock.request('screen')}catch(e){}}
+$('pp').onclick=()=>gm?send({k:'cmd',a:'pp'}):play();
+mv.onplay=()=>{$('pp').textContent='⏸';act('play');show();wake()};
+mv.onpause=()=>{$('pp').textContent='▶';act('pause');show()};
+mv.onseeked=()=>{clearTimeout(sdeb);sdeb=setTimeout(()=>act('seek'),150)};
+mv.onratechange=()=>{$('spd').textContent=mv.playbackRate+'x';act('rate')};
+mv.onended=()=>{$('pp').textContent='▶';show()};
+$('sk').oninput=e=>{if(gm){clearTimeout(sdeb);const v=e.target.value/1000*gd;sdeb=setTimeout(()=>send({k:'cmd',a:'seek',v}),200);return}if(mv.duration)mv.currentTime=e.target.value/1000*mv.duration;show()};
+mv.ontimeupdate=()=>{if(gm||!mv.duration)return;$('sk').value=mv.currentTime/mv.duration*1000;$('tm').textContent=fmt(mv.currentTime);if(fkey&&Date.now()-lastSave>5000){lastSave=Date.now();SS(fkey,mv.currentTime)}};
+const skip=d=>{if(gm){send({k:'cmd',a:'skip',v:d});toast((d>0?'⏩ +':'⏪ ')+d+' sn');return}if(!mv.duration)return;mv.currentTime=Math.min(mv.duration,Math.max(0,mv.currentTime+d));toast((d>0?'⏩ +':'⏪ ')+d+' sn');show()};
+$('b10').onclick=()=>skip(-10);$('f10').onclick=()=>skip(10);
+const SP=[0.5,0.75,1,1.25,1.5,2];
+$('spd').onclick=()=>{if(gm){send({k:'cmd',a:'rate',v:SP[(SP.indexOf(gr)+1)%SP.length]});return}mv.playbackRate=SP[(SP.indexOf(mv.playbackRate)+1)%SP.length]||1;show()};
+$('vol').oninput=e=>{mv.volume=e.target.value;mv.muted=false;$('mu').textContent=mv.volume==0?'🔇':'🔊'};
+$('mu').onclick=()=>{mv.muted=!mv.muted;$('mu').textContent=mv.muted?'🔇':'🔊'};
+$('fs').onclick=async()=>{if(document.fullscreenElement){document.exitFullscreen();return}try{await(stage.requestFullscreen||stage.webkitRequestFullscreen).call(stage);screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e){toast('Tam ekran açılamadı')}};
+$('pip').onclick=()=>{if(document.pictureInPictureEnabled&&mv.readyState)mv.requestPictureInPicture().catch(()=>{});else toast('Bu cihazda desteklenmiyor')};
+// dokunma: tek dokunuş = kontrolleri aç/kapa, çift dokunuş = 10 sn sar
+mv.addEventListener('click',e=>{if(swiped)return;const n=Date.now();if(n-lastTap<300){const r=mv.getBoundingClientRect();skip(e.clientX<r.left+r.width/2?-10:10);lastTap=0;return}lastTap=n;setTimeout(()=>{if(lastTap===n){stage.classList.contains('show')&&!mv.paused?stage.classList.remove('show'):show()}},300)});
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.type!=='range')return;
+ if(e.code==='Space'){e.preventDefault();play()}else if(e.key==='ArrowRight')skip(10);else if(e.key==='ArrowLeft')skip(-10);else if(e.key==='f')$('fs').click();else if(e.key==='m')$('mu').click()});
+// uzaktan gelen komut
+function onVid(m){if(gm){toast(peer+' '+({play:'▶ oynattı',pause:'⏸ durdurdu'}[m.a]||''));return}applying=true;if(m.n)peer=m.n;if(m.t!=null)$('pi').textContent='Karşı tarafın konumu: '+fmt(m.t);
+ if(m.r&&mv.playbackRate!==m.r)mv.playbackRate=m.r;
+ if(m.a==='seek'||Math.abs(mv.currentTime-m.t)>0.7)mv.currentTime=m.t;
+ if(m.a==='play')mv.play().catch(()=>sys('Oynatmak için ▶ tuşuna bas'));
+ if(m.a==='pause')mv.pause();
+ const L={play:'▶ oynattı',pause:'⏸ durdurdu',seek:'⏩ '+fmt(m.t)+' konumuna sardı',rate:'hızı '+m.r+'x yaptı'};
+ toast(peer+' '+(L[m.a]||''));setTimeout(()=>applying=false,600)}
+$('syn').onclick=()=>{if(!dc||dc.readyState!=='open')return sys('Henüz bağlı değilsin');send({k:'req'});toast('Eşitleme istendi')};
+// altyazı
+$('sub').onclick=()=>$('sfp').click();
+const pt=t=>{const m=t.trim().replace(',','.').split(':').map(parseFloat);return m.length===3?m[0]*3600+m[1]*60+m[2]:m[0]*60+m[1]};
+function parseSub(t){const o=[];t.replace(/\r/g,'').split(/\n\s*\n/).forEach(b=>{const L=b.split('\n'),i=L.findIndex(x=>x.includes('-->'));if(i<0)return;const p=L[i].split('-->'),x=L.slice(i+1).join('\n').replace(/<[^>]+>/g,'').trim();if(x)o.push([pt(p[0]),pt(p[1].trim().split(' ')[0]),x])});return o}
+function sendSub(){if(!cues.length||host===false)return;const s=JSON.stringify(cues),n=Math.ceil(s.length/12000);for(let i=0;i<n;i++)send({k:'sub',i,n,d:s.slice(i*12000,(i+1)*12000)})}
+$('sfp').onchange=async e=>{const f=e.target.files[0];if(!f)return;const b=await f.arrayBuffer();let t;try{t=new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(x){t=new TextDecoder('windows-1254').decode(b)}
+ cues=parseSub(t.replace(/^\uFEFF/,''));subOn=true;$('cc').classList.add('on');toast(cues.length+' satır altyazı yüklendi');tab('chat');sendSub()};
+$('cc').onclick=()=>{if(!cues.length)return host===false?toast('Altyazı yok'):$('sfp').click();subOn=!subOn;$('cc').classList.toggle('on',subOn);if(!subOn)$('subt').textContent=''};
+// sohbet
+function sendMsg(){const v=$('mi').value.trim();if(!v)return;if(!dc||dc.readyState!=='open'){sys('Henüz bağlı değilsin');return}send({k:'c',x:v});add(v,'me');$('mi').value=''}
+$('sb').onclick=sendMsg;$('mi').onkeydown=e=>{if(e.key==='Enter')sendMsg()};
+$('nm').value=ST('nm')||'';$('nm').onchange=()=>{SS('nm',$('nm').value);send({k:'n',n:$('nm').value})};
+// medya (mikrofon / kamera)
+async function media(){try{ls=await navigator.mediaDevices.getUserMedia({audio:true,video:{facingMode:'user'}})}catch(e){try{ls=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e2){ls=null}}
+ if(ls){ls.getAudioTracks().forEach(t=>t.enabled=false);ls.getVideoTracks().forEach(t=>t.enabled=false)}}
+function tog(kind){if(!ls){sys('Mikrofon/kamera izni yok, izinleri kontrol et');return}
+ const ts=kind==='a'?ls.getAudioTracks():ls.getVideoTracks();if(!ts.length){sys('Bu cihazda bulunamadı');return}
+ const on=!ts[0].enabled;ts.forEach(t=>t.enabled=on);
+ if(kind==='a'){micOn=on;$('mic').textContent='🎤 Mikrofon: '+(on?'açık':'kapalı')}else{camOn=on;$('cam').textContent='📷 Kamera: '+(on?'açık':'kapalı');$('lv').style.display=on?'block':'none'}
+ send({k:'cam',on:camOn})}
+const ask=t=>new Promise(r=>{$('dt').textContent=t;$('dlg').style.display='flex';$('dy').onclick=()=>{$('dlg').style.display='none';r(true)};$('dn').onclick=()=>{$('dlg').style.display='none';r(false)}});
+$('mic').onclick=async()=>{if(!micOn&&!await ask('Mikrofonun açılacak, karşıdaki seni duyacak. Açılsın mı?'))return;tog('a')};
+$('cam').onclick=async()=>{if(!camOn&&!await ask('Görüntün açılacak, karşıdaki seni görecek. Açılsın mı?'))return;tog('v')};
+const uc=()=>{$('cams').style.display=($('lv').style.display==='block'||$('rv').style.display==='block')?'flex':'none'};
+['lv','rv'].forEach(i=>new MutationObserver(uc).observe($(i),{attributes:true,attributeFilter:['style']}));
+// bağlantı
+function setup(){pc=new RTCPeerConnection({iceServers:ice()});
+ const au=ls&&ls.getAudioTracks()[0],vi=ls&&ls.getVideoTracks()[0];
+ pc.addTransceiver(au||'audio',{direction:'sendrecv'});pc.addTransceiver(vi||'video',{direction:'sendrecv'});pc.addTransceiver('audio',{direction:'sendrecv'});pc.addTransceiver('video',{direction:'sendrecv'});
+ if(ls)$('lv').srcObject=new MediaStream(ls.getVideoTracks());
+ pc.ontrack=e=>{const i=pc.getTransceivers().indexOf(e.transceiver);
+ if(i>1){if(host!==false)return;gm=gm||new MediaStream();gm.addTrack(e.track);mv.srcObject=gm;hideEmpty();mv.play().catch(()=>sys('Oynatmak için ▶ tuşuna bas'));return}
+ if(e.track.kind==='video')$('rv').srcObject=new MediaStream([e.track]);else{const a=new Audio();a.srcObject=new MediaStream([e.track]);a.play().catch(()=>{});window._a=a}};
+ pc.onconnectionstatechange=()=>{const s=pc.connectionState,ok=s==='connected';$('dot').classList.toggle('on',ok);$('st').textContent=ok?'Bağlandı':s==='failed'?'Başarısız':s==='disconnected'?'Koptu':'Bağlanıyor…';if(ok){if(es)es.close();clearTimeout(rcT);rcT=null;sys(wantRC?'Yeniden bağlandı ✅':'Bağlandın 🎉');wantRC=true;tab('chat')}if(s==='disconnected'||s==='failed'){toast('Bağlantı koptu, yeniden deneniyor…');scheduleRC()}};
+ pc.ondatachannel=e=>wire(e.channel)}
+function wire(ch){dc=ch;ch.onopen=()=>{feed();sendSub();send({k:'cam',on:camOn});send({k:'n',n:$('nm').value});if(mv.duration)send({k:'meta',n:mv._n,d:mv.duration})};
+ ch.onmessage=e=>{const m=JSON.parse(e.data);
+ if(m.k==='c'){add(m.x,'');beep();toast('💬 '+peer+': '+m.x);if(!$('chat').classList.contains('a')){unread++;$('bd').textContent=unread;$('bd').style.display='block'}}
+ else if(m.k==='v')onVid(m);
+ else if(m.k==='cmd'&&host)cmd(m);
+ else if(m.k==='tk'&&gm){gd=m.d;gr=m.r;gt=m.t;gts=performance.now();gp=!m.p;$('pi').textContent='Film konumu: '+fmt(m.t)+' / '+fmt(m.d);$('sk').value=m.t/m.d*1000;$('tm').textContent=fmt(m.t);$('du').textContent=fmt(m.d);$('pp').textContent=m.p?'▶':'⏸';$('spd').textContent=m.r+'x'}
+ else if(m.k==='sub'){if(m.i===0)subBuf=[];subBuf[m.i]=m.d;if(subBuf.filter(Boolean).length===m.n){try{cues=JSON.parse(subBuf.join(''));subOn=true;$('cc').classList.add('on');toast('Altyazı geldi')}catch(x){}}}
+ else if(m.k==='yl')ytLoad(m.id);
+ else if(m.k==='yv')ytSync(m);
+ else if(m.k==='ml'){gm=null;mv.srcObject=null;showMv();mv.src=m.u;hideEmpty()}
+ else if(m.k==='cam')$('rv').style.display=m.on?'block':'none';
+ else if(m.k==='r')react(m.e);
+ else if(m.k==='n'){if(m.n)peer=m.n}
+ else if(m.k==='req'){send({k:'v',a:mv.paused?'pause':'play',t:mv.currentTime,r:mv.playbackRate})}
+ else if(m.k==='meta'&&!gm&&Number.isFinite(mv.duration)&&mv.duration&&Math.abs(m.d-mv.duration)>2)sys('⚠️ Film süreleri farklı ('+fmt(m.d)+' / '+fmt(mv.duration)+'), aynı dosyayı seçtiğinizden emin olun')}}
+const gather=()=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();pc.onicegatheringstatechange=()=>pc.iceGatheringState==='complete'&&r();setTimeout(r,4000)});
+const enc=d=>btoa(unescape(encodeURIComponent(JSON.stringify(d))));const dec=s=>JSON.parse(decodeURIComponent(escape(atob(s.trim()))));
+async function hostRoom(c){if(pc)pc.close();gen++;await(ls?0:media());setup();wire(pc.createDataChannel('x'));await pc.setLocalDescription(await pc.createOffer());await gather();
+ const r=await post(c,'O'+gen+':'+await pack(pc.localDescription));if(!r.ok)throw 0;const g=gen;
+ listen(c,'',async m=>{if(m.startsWith('A'+g+':')&&pc.signalingState==='have-local-offer'){try{await pc.setRemoteDescription(await unpack(m.slice(m.indexOf(':')+1)))}catch(x){}}})}
+$('host').onclick=async()=>{host=true;uiHost();wantRC=false;gen=0;$('inp').style.display='none';$('codeBox').style.display='block';$('codeBox').textContent='…';
+ try{code=String(1000+Math.floor(Math.random()*9000));await hostRoom(code);$('codeBox').textContent=code;$('st').textContent='Kod: '+code;sys('Arkadaşına bu kodu söyle: '+code)}
+ catch(x){code=null;$('codeBox').style.display='none';sys('Oda kurulamadı, internetini kontrol et')}};
+$('join').onclick=()=>{$('codeBox').style.display='none';$('inp').style.display='block';$('inp').value='';$('inp').focus()};
+$('inp').oninput=()=>{const c=$('inp').value.replace(/\D/g,'');$('inp').value=c;if(c.length===4){$('inp').blur();lastGen=0;wantRC=false;joinShort(c)}};
+$('hang').onclick=()=>{wantRC=false;code=null;clearTimeout(rcT);rcT=null;if(es)es.close();if(pc)pc.close();if(ls)ls.getTracks().forEach(t=>t.stop());ls=null;dc=null;micOn=camOn=false;facing='user';$('lv').style.transform='scaleX(-1)';$('mic').textContent='🎤 Mikrofon: kapalı';$('cam').textContent='📷 Kamera: kapalı';$('rv').style.display=$('lv').style.display='none';$('dot').classList.remove('on');$('st').textContent='Bağlı değil';sys('Bağlantı bitti')};
+// canlı yayın: film oda kurucusundan gelir
+function feed(){if(host!==true||lm||!pc||!mv.captureStream)return;const s=mv.captureStream(),t=pc.getTransceivers(),a=s.getAudioTracks()[0],v=s.getVideoTracks()[0];if(a)t[2].sender.replaceTrack(a);if(v)t[3].sender.replaceTrack(v)}
+mv.addEventListener('playing',feed);
+function cmd(m){if(m.a==='pp')play();else if(m.a==='skip')skip(m.v);else if(m.a==='seek')mv.currentTime=m.v;else if(m.a==='rate')mv.playbackRate=m.v}
+function showMv(){mv.style.display='';$('ov').style.display='';$('yt').style.display='none'}
+// YouTube / link
+function ytLoad(id){gm=null;mv.srcObject=null;mv.style.display='none';$('ov').style.display='none';hideEmpty();$('yt').style.display='block';
+ if(yt&&yt.loadVideoById)return yt.loadVideoById(id);
+ const go=()=>{yt=new YT.Player('yt',{videoId:id,width:'100%',height:'100%',playerVars:{playsinline:1,rel:0},events:{onStateChange:e=>{if(applying)return;const s=e.data;if(s===1||s===2)send({k:'yv',a:s===1?'play':'pause',t:yt.getCurrentTime()})},onError:e=>toast('YouTube açılmadı (hata '+e.data+')')}})};
+ if(window.YT&&YT.Player)go();else{window.onYouTubeIframeAPIReady=go;const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}}
+function ytSync(m){if(!yt||!yt.seekTo)return;applying=true;if(m.a==='seek'||Math.abs(yt.getCurrentTime()-m.t)>1.5)yt.seekTo(m.t,true);if(m.a==='play')yt.playVideo();if(m.a==='pause')yt.pauseVideo();setTimeout(()=>applying=false,900)}
+$('lkb').onclick=()=>{const u=$('lk').value.trim(),y=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);if(!u)return;lm=true;if(y){ytLoad(y[1]);send({k:'yl',id:y[1]})}else{gm=null;mv.srcObject=null;showMv();mv.src=u;hideEmpty();send({k:'ml',u})}tab('chat');sys('Link açıldı')};
+setInterval(()=>{if(host===true&&!lm&&mv.duration)send({k:'tk',t:mv.currentTime,d:mv.duration,p:mv.paused,r:mv.playbackRate});
+ if(yt&&yt.getCurrentTime&&yt.getPlayerState){const t=yt.getCurrentTime();if(!applying&&Math.abs(t-ytLast-(yt.getPlayerState()===1?1:0))>2)send({k:'yv',a:'seek',t});ytLast=t}},1000);
+function hideEmpty(){$('empty').style.display='none';stage.classList.add('has')}
+function uiHost(){gm=null;$('pick').style.display=$('chg').style.display=$('sub').style.display='';$('lkrow').style.display='flex';$('et').textContent='Film seç, karşındaki canlı izler'}
+function uiGuest(){$('pick').style.display=$('chg').style.display=$('sub').style.display=$('lkrow').style.display='none';$('et').textContent='Film oda kurucusundan gelecek'}
+// kamera çevir (ön/arka)
+async function flip(){if(!ls)return sys('Kamera için önce “Oda kur” veya “Katıl” de');const nf=facing==='user'?'environment':'user';
+ ls.getVideoTracks().forEach(t=>{ls.removeTrack(t);t.stop()});
+ try{const v=(await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:nf}}})).getVideoTracks()[0];v.enabled=camOn;ls.addTrack(v);facing=nf;
+  if(pc)await pc.getTransceivers()[1].sender.replaceTrack(v);$('lv').srcObject=new MediaStream([v]);$('lv').style.transform=nf==='user'?'scaleX(-1)':'none';toast(nf==='user'?'Ön kamera':'Arka kamera')}
+ catch(e){sys('Kamera çevrilemedi, izni kontrol et')}}
+$('flip').onclick=flip;
+// klavye açılınca sadece sohbet alanı kalsın
+let maxH=innerHeight,lw=innerWidth;addEventListener('resize',()=>{if(innerWidth!==lw){lw=innerWidth;maxH=innerHeight}else maxH=Math.max(maxH,innerHeight);document.body.classList.toggle('kb',innerHeight<maxH*0.75)});
+// 4 haneli kod: sinyalleşme ücretsiz ntfy.sh servisi üzerinden
+const NT='https://ntfy.sh/',tp=c=>NT+'birlikte-sinema-'+c;let es;
+const post=(c,t)=>fetch(tp(c),{method:'POST',body:t});
+function listen(c,since,fn){if(es)es.close();es=new EventSource(tp(c)+'/sse'+(since?'?since='+since:''));es.onmessage=e=>{try{const m=JSON.parse(e.data).message;if(m)fn(m)}catch(x){}}}
+async function pack(d){const u=new Uint8Array(await new Response(new Blob([JSON.stringify(d)]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());let t='';u.forEach(c=>t+=String.fromCharCode(c));return btoa(t)}
+async function unpack(t){const u=Uint8Array.from(atob(t),c=>c.charCodeAt(0));return JSON.parse(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('deflate'))).text())}
+function joinShort(c,patient){code=c;sys(patient?'Oda tekrar aranıyor…':'Oda aranıyor…');let last=null,g=0;
+ listen(c,'10m',m=>{if(m[0]==='O'){const n=parseInt(m.slice(1,m.indexOf(':')))||1;if(n>=g){g=n;last=m}}});
+ let tries=patient?40:2;
+ const chk=async()=>{const i=last?last.indexOf(':'):0,n=last?(parseInt(last.slice(1,i))||1):0;
+  if(!last||n<=lastGen){if(--tries>0)return setTimeout(chk,3000);return sys('Bu kodla oda bulunamadı, kodu kontrol et')}
+  try{const o=await unpack(last.slice(i+1));host=false;uiGuest();if(pc)pc.close();await(ls?0:media());setup();await pc.setRemoteDescription(o);await pc.setLocalDescription(await pc.createAnswer());await gather();await post(c,'A'+n+':'+await pack(pc.localDescription));lastGen=n;$('st').textContent='Bağlanıyor…';sys('Cevap gönderildi, bağlanıyor…')}
+  catch(x){sys('Bağlanılamadı, tekrar dene')}};
+ setTimeout(chk,1500)}
+function scheduleRC(d=4000){if(!code||!wantRC||rcT)return;rcT=setTimeout(()=>{rcT=null;if(pc&&pc.connectionState==='connected')return;sys('Yeniden bağlanılıyor…');(host?hostRoom(code):Promise.resolve(joinShort(code,true))).catch(()=>{});setTimeout(()=>{if(!pc||pc.connectionState!=='connected')scheduleRC()},25000)},d)}
+function ice(){const l=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}],t=(ST('turn')||'').split('|');if(t.length===3&&t[0].trim())l.push({urls:t[0].trim(),username:t[1].trim(),credential:t[2].trim()});return l}
+$('tn').value=ST('turn')||'';$('tn').onchange=()=>SS('turn',$('tn').value.trim());
+// altyazı ayarı
+const si=()=>{$('sinfo').textContent='Gecikme: '+sdel.toFixed(1)+' sn · Boyut: '+ssz;stage.style.setProperty('--ss',ssz+'px')};
+$('sd1').onclick=()=>{sdel-=0.5;si()};$('sd2').onclick=()=>{sdel+=0.5;si()};$('sz1').onclick=()=>{ssz=Math.max(10,ssz-2);si()};$('sz2').onclick=()=>{ssz=Math.min(40,ssz+2);si()};
+setInterval(()=>{if(!cues.length||!subOn){$('subt').textContent='';return}const t=(gm?gt+(gp?(performance.now()-gts)/1000*gr:0):mv.currentTime)-sdel,c=cues.find(x=>t>=x[0]&&t<x[1]),x=c?c[2]:'';if($('subt').textContent!==x)$('subt').textContent=x},250);
+// bildirim sesi
+let ac;function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=0.08;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.12)}catch(e){}}
+// kaydırma: sol kenar parlaklık, sağ kenar ses; basılı tut: 2x hız
+let tx=null,ty,tz,tv,tb=1,mvd=false,lp=false,lpT,lpR,swiped=false;
+stage.addEventListener('touchstart',e=>{if(e.target.closest('#ov')||e.touches.length>1)return;const t=e.touches[0],r=stage.getBoundingClientRect(),x=(t.clientX-r.left)/r.width;tx=t.clientX;ty=t.clientY;mvd=false;lp=false;tz=x<0.28?'b':x>0.72?'v':'c';tv=mv.volume;
+ clearTimeout(lpT);if(tz==='c'&&mv.style.display!=='none')lpT=setTimeout(()=>{if(mvd)return;lp=true;lpR=gm?gr:mv.playbackRate;if(gm)send({k:'cmd',a:'rate',v:2});else mv.playbackRate=2;toast('⏩ 2x hız')},500)},{passive:true});
+stage.addEventListener('touchmove',e=>{if(tx===null)return;const t=e.touches[0],dy=ty-t.clientY;if(Math.abs(dy)<12&&!mvd)return;if(tz==='c')return;mvd=true;clearTimeout(lpT);const d=dy/stage.getBoundingClientRect().height;
+ if(tz==='v'){const v=Math.min(1,Math.max(0,tv+d));mv.volume=v;mv.muted=false;$('vol').value=v;$('mu').textContent=v==0?'🔇':'🔊';toast('🔊 '+Math.round(v*100)+'%')}
+ else{tb=Math.min(1.6,Math.max(0.3,(window._tb||1)+d));mv.style.filter='brightness('+tb+')';toast('☀️ '+Math.round(tb*100)+'%')}},{passive:true});
+stage.addEventListener('touchend',()=>{clearTimeout(lpT);if(lp){if(gm)send({k:'cmd',a:'rate',v:lpR});else mv.playbackRate=lpR;lp=false;swiped=true;setTimeout(()=>swiped=false,400)}if(mvd){window._tb=tb;swiped=true;setTimeout(()=>swiped=false,400)}tx=null});
+</script></body></html>
